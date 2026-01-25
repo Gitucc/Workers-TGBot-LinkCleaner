@@ -129,7 +129,7 @@ export const rules = [
 
 ## 🙏 致谢
 
-特别感谢 [AdGuard](https://adguard.com/) 提供的开源跟踪保护过滤器。本项目使用的 `filter.txt` 规则库是该项目的一部分，为链接清理提供了强大的数据支持。
+特别感谢 [AdGuard](https://adguard.com/) 提供的开源跟踪保护过滤器。本项目集成了 [AdguardTeam/FiltersRegistry](https://github.com/AdguardTeam/FiltersRegistry) 中的 `General tracking parameters list` 规则库（路径为 `filter_17_TrackParam/filter.txt`），为链接清理提供了强大的数据支持。
 
 ## 📄 开源协议
 
