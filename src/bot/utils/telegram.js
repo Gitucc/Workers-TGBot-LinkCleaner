@@ -19,6 +19,7 @@ async function sendMessage(chatId, text, replyMarkup = null, replyToMessageId = 
     const params = {
         chat_id: chatId,
         text,
+        parse_mode: 'Markdown',
         reply_to_message_id: replyToMessageId,
     };
     if (replyMarkup) {
