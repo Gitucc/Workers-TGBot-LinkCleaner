@@ -1,0 +1,30 @@
+name = "tgbot-link-cleaner"
+
+main = "./index.js"
+compatibility_date = "2023-03-21"
+workers_dev = true
+
+[observability]
+enabled = false
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+persist = true
+head_sampling_rate = 1
+
+[[d1_databases]]
+binding = "DB"
+database_name = "link-cleaner-db"
+database_id = "D1_DATABASE_ID_PLACEHOLDER"
+
+# Scheduled Tasks (Cron Triggers)
+# Run at 03:00 UTC every 3 days
+[triggers]
+crons = ["0 3 */3 * *"]
