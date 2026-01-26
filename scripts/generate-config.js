@@ -1,0 +1,46 @@
+const fs = require('fs');
+const path = require('path');
+
+const templatePath = path.join(__dirname, '..', 'wrangler.toml.template');
+const configPath = path.join(__dirname, '..', 'wrangler.toml');
+const envPath = path.join(__dirname, '..', '.env');
+
+// Simple .env parser
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+    if (match) {
+      const key = match[1];
+      let value = match[2] || '';
+      if (value.length > 0 && value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+        value = value.replace(/\\n/gm, '\n');
+      }
+      value = value.replace(/(^['"]|['"]$)/g, '').trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
+
+const dbId = process.env.D1_DATABASE_ID;
+
+if (!dbId) {
+  console.error('Error: D1_DATABASE_ID environment variable is not set.');
+  console.error('Please create a .env file with D1_DATABASE_ID=... or set the environment variable in your system/CI.');
+  process.exit(1);
+}
+
+if (!fs.existsSync(templatePath)) {
+    console.error(`Error: Template file not found at ${templatePath}`);
+    process.exit(1);
+}
+
+let template = fs.readFileSync(templatePath, 'utf8');
+// Replace the placeholder
+// We use a specific placeholder string
+const config = template.replace(/D1_DATABASE_ID_PLACEHOLDER/g, dbId);
+
+fs.writeFileSync(configPath, config);
+console.log('Successfully generated wrangler.toml from wrangler.toml.template');

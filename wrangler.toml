@@ -1,5 +1,0 @@
-name = "tgbot-link-cleaner"
-
-main = "./index.js"
-compatibility_date = "2023-03-21"
-workers_dev = true

@@ -1,4 +1,4 @@
-import { requestTelegramBotAPI } from "./telegram";
+import { requestTelegramBotAPI } from "../utils/telegram";
 
 async function handleTGBotCmd(request, pathname) {
     if (pathname == '/TGBotCmd/setWebhook') {
