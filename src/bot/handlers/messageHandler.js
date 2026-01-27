@@ -126,10 +126,47 @@ async function handleText({ text, chat, message_id: messageId }, env) {
                 await sendMessage(chat.id, cleanedUrl, null, messageId);
             } else {
                 const replyText = cleanedUrl + "\n\n如果你对处理的结果不满意，请在下面选择要保留（或再次移除）的参数吧：";
-                const keyboardButtons = rawParams.map(param => [{
-                    text: param, 
-                    callback_data: "keep:" + param 
-                }]);
+
+                // 按长度排序并按行打包按钮（基于字符宽度估算）
+                function createKeyboardFromParams(params, maxRowWidth = 24) {
+                    if (!Array.isArray(params) || params.length === 0) return [];
+                    // 按长度升序，这样短的优先被放在一起
+                    const sorted = [...params].sort((a, b) => a.length - b.length);
+                    const rows = [];
+                    let currentRow = [];
+                    let currentLen = 0;
+
+                    for (const p of sorted) {
+                        const textLen = p.length;
+                        // 如果单个按钮本身就超出宽度，独占一行
+                        if (textLen >= maxRowWidth) {
+                            if (currentRow.length > 0) {
+                                rows.push(currentRow);
+                                currentRow = [];
+                                currentLen = 0;
+                            }
+                            rows.push([p]);
+                            continue;
+                        }
+
+                        // 预估加入这个按钮后行长度（按钮间按1个字符分隔）
+                        const projected = currentLen + (currentRow.length > 0 ? 1 : 0) + textLen;
+                        if (projected <= maxRowWidth) {
+                            currentRow.push(p);
+                            currentLen = projected;
+                        } else {
+                            if (currentRow.length > 0) rows.push(currentRow);
+                            currentRow = [p];
+                            currentLen = textLen;
+                        }
+                    }
+                    if (currentRow.length > 0) rows.push(currentRow);
+
+                    // 转换为 Telegram 的 inline_keyboard 结构
+                    return rows.map(row => row.map(param => ({ text: param, callback_data: "keep:" + param })));
+                }
+
+                const keyboardButtons = createKeyboardFromParams(rawParams, 24);
                 const replyMarkup = { inline_keyboard: keyboardButtons };
                 await sendMessage(chat.id, replyText, replyMarkup, messageId);
             }
