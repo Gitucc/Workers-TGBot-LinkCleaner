@@ -166,7 +166,7 @@ async function handleText({ text, chat, message_id: messageId }, env) {
                     return rows.map(row => row.map(param => ({ text: param, callback_data: "keep:" + param })));
                 }
 
-                const keyboardButtons = createKeyboardFromParams(rawParams, 24);
+                const keyboardButtons = createKeyboardFromParams(rawParams, 32);
                 const replyMarkup = { inline_keyboard: keyboardButtons };
                 await sendMessage(chat.id, replyText, replyMarkup, messageId);
             }
