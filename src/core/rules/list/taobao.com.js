@@ -22,5 +22,5 @@ export default {
         /^(www\.)?tmall\.com$/i
     ],
     type: 'param_clean',
-    keepParams: ['id', 'itemId']
+    keepParams: ['id', 'itemId', 'skuId']
 };
