@@ -1,4 +1,4 @@
-name = "tgbot-link-cleaner"
+name = "WORKERS_NAME_PLACEHOLDER"
 
 main = "./index.js"
 compatibility_date = "2023-03-21"
