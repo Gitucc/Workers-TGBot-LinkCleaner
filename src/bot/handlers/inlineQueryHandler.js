@@ -1,12 +1,35 @@
-import { requestTelegramBotAPI } from "../utils/telegram";
+import { requestTelegramBotAPI, escapeHTML } from "../utils/telegram";
 import { LinkProcessor } from "../../core/LinkProcessor";
 
-const URL_PATTERN = /http(s)?:\/\/([\w-]+\.)+[\w-]+(\/[\w-./\[\]?%&=+#,;@~]*)?/g;
+// Expanded pattern to catch more links
+const URL_PATTERN = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
-export async function handleInlineQuery(inlineQuery) {
+export async function handleInlineQuery(inlineQuery, env) {
     const query = inlineQuery.query;
     // Basic unique ID generation
     const generateUniqueId = (prefix) => `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+
+    // Case 0: Truncation Check (Telegram API Limit ~256 chars)
+    if (query.length >= 250) {
+         await requestTelegramBotAPI("answerInlineQuery", {
+            inline_query_id: inlineQuery.id,
+            cache_time: 3600, // Cache this warning for a while
+            results: [
+                {
+                    type: 'article',
+                    id: generateUniqueId('truncated'),
+                    title: '⚠️ 链接过长被截断',
+                    description: "Telegram 限制内联查询长度 (256字符)，请切换到私聊发送。",
+                    input_message_content: {
+                        message_text: "由于 Telegram 限制，超长链接无法在内联模式下处理。\n请直接在私聊中发送此链接。",
+                        parse_mode: 'HTML'
+                    },
+                    thumb_url: "https://img.icons8.com/color/48/error--v1.png"
+                },
+            ]
+        });
+        return;
+    }
 
     // Case 1: Empty Query or No Links
     // Show a "How to use" prompt
@@ -22,7 +45,8 @@ export async function handleInlineQuery(inlineQuery) {
                     title: '🔎 等待输入链接...',
                     description: "请粘贴或输入需要清理的链接",
                     input_message_content: {
-                        message_text: "请直接在输入框粘贴或输入链接，例如：\n@Bot https://twitter.com/...",
+                        message_text: "请直接在输入框粘贴或输入链接，例如：\n<code>@Bot https://twitter.com/...</code>",
+                        parse_mode: 'HTML'
                     },
                     thumb_url: "https://img.icons8.com/color/48/search--v1.png" // Optional visual aid
                 },
@@ -35,7 +59,8 @@ export async function handleInlineQuery(inlineQuery) {
         // Case 2: Links Detected
         // Process them
         const processedResults = await Promise.all(rawLinks.map(async (rawLink) => {
-            const cleaned = await LinkProcessor.process(rawLink);
+            // Pass env.DB here to enable Tier 2 (AdGuard rules)
+            const cleaned = await LinkProcessor.process(rawLink, env.DB);
             return {
                 raw: rawLink,
                 cleaned: cleaned
@@ -62,7 +87,8 @@ export async function handleInlineQuery(inlineQuery) {
                     title: title,
                     description: description, 
                     input_message_content: {
-                        message_text: replyText,
+                        message_text: escapeHTML(replyText),
+                        parse_mode: 'HTML'
                     },
                     thumb_url: thumb
                 },
@@ -80,7 +106,10 @@ export async function handleInlineQuery(inlineQuery) {
                 id: generateUniqueId('error'),
                 title: '❌ 处理出错',
                 description: "请稍后重试",
-                input_message_content: { message_text: "处理链接时发生错误。" }
+                input_message_content: { 
+                    message_text: "处理链接时发生错误。",
+                    parse_mode: 'HTML'
+                }
             }]
         });
     }

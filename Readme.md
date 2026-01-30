@@ -27,6 +27,8 @@ npx wrangler d1 create link-cleaner-db
 2.  在项目根目录创建一个 `.env` 文件：
     ```env
     D1_DATABASE_ID=你的_database_id
+    # 可选：自定义 Worker 名称 (默认: tgbot-link-cleaner)
+    WORKERS_NAME=your-worker-name
     ```
 3.  运行配置生成命令：
     ```bash
@@ -120,6 +122,7 @@ export const rules = [
 2. `CF_ACCOUNT_ID`: 你的 Cloudflare 账户 ID。
 3. `TG_BOT_TOKEN`: 你的 Telegram Bot Token。
 4. `D1_DATABASE_ID`: 你的 D1 数据库 ID (从步骤 2 获取)。
+5. `WORKERS_NAME` (Variables): 可选，自定义 Worker 名称。
 
 ## 🛠️ 技术栈
 - **Runtime**: Cloudflare Workers

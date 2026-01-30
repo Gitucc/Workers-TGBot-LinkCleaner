@@ -4,13 +4,13 @@ import { AdGuardUpdater } from "./src/core/AdGuardUpdater";
 
 export default {
     async fetch(request, env, ctx) {
-        // Compatibility Shim: Expose env vars to global scope for legacy code support
         globalThis.TG_BOT_TOKEN = env.TG_BOT_TOKEN;
 
-        // Manual Update Trigger (for debugging/admin)
+        // Manual Update Trigger
         if (new URL(request.url).pathname === '/update-rules' && request.method === 'POST') {
-             // Basic auth check (optional but recommended)
-             if (request.headers.get('X-Admin-Key') !== env.TG_BOT_TOKEN) {
+             // Secure with dedicated key, fallback to Bot Token if not set (legacy compat)
+             const adminKey = env.ADMIN_KEY || env.TG_BOT_TOKEN;
+             if (request.headers.get('X-Admin-Key') !== adminKey) {
                  return new Response('Unauthorized', { status: 401 });
              }
              const result = await AdGuardUpdater.update(env);
@@ -28,21 +28,17 @@ export default {
 async function handleRequest(request, env) {
     const { pathname } = new URL(request.url);
     
-    // Check for POST request from Telegram
     if (request.method === "POST" && 
         request.headers.get("Content-Type")?.startsWith("application/json") && 
         pathname === `/${env.TG_BOT_TOKEN}`) {
         return handleTGBotUpdate(request, env);
     }
-    // Check for Management Commands
     else if (request.method === "GET" && (pathname.startsWith('/TGBotCmd/') || pathname === '/TGBotCmd')) {
-        return handleTGBotCmd(request, pathname);
+        return handleTGBotCmd(request, pathname, env);
     }
-    // Health Check
     else if (request.method === "GET" && pathname === '/state') {
         return new Response("I'm alive.\n", { headers: { "content-type": "text/plain" } });
     }
-    // Fallback
     else {
         return new Response("Error: Invalid Endpoint.\n", { status: 404, headers: { "content-type": "text/plain" } });
     }

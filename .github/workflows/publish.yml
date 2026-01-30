@@ -18,6 +18,7 @@ jobs:
         run: node scripts/generate-config.js
         env:
           D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          WORKERS_NAME: ${{ vars.WORKERS_NAME }}
 
       - name: Deploy to Cloudflare Workers
         id: deploy
@@ -27,15 +28,32 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           secrets: |
             TG_BOT_TOKEN
+            ADMIN_KEY
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          ADMIN_KEY: ${{ secrets.TG_BOT_TOKEN }}
 
       - name: Initialize AdGuard Rules
         if: success()
+        env:
+           DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+           ADMIN_KEY: ${{ secrets.TG_BOT_TOKEN }}
         run: |
-          # Using the deployment URL from wrangler-action output to trigger initialization
-          DEPLOYED_URL=$(echo "${{ steps.deploy.outputs.deployment-url }}")
-          echo "Triggering rule update at ${DEPLOYED_URL}/update-rules"
-          curl -X POST "${DEPLOYED_URL}/update-rules" \
-            -H "X-Admin-Key: ${{ secrets.TG_BOT_TOKEN }}" \
-            -i
+          if [ -z "$DEPLOY_URL" ]; then
+            echo "::warning::Deployment URL is empty. Skipping rule update."
+            exit 0
+          fi
+          
+          echo "Waiting for deployment to propagate..."
+          sleep 10
+          
+          echo "Triggering rule update at ${DEPLOY_URL}/update-rules"
+          response=$(curl -s -w "%{http_code}" -o /dev/null -X POST "${DEPLOY_URL}/update-rules" \
+            -H "X-Admin-Key: ${ADMIN_KEY}")
+            
+          if [ "$response" -ne 200 ]; then
+             echo "::error::Rule update failed with status code $response"
+             exit 1
+          else
+             echo "Rule update triggered successfully."
+          fi

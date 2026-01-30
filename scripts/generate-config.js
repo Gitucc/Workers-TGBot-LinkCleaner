@@ -37,10 +37,13 @@ if (!fs.existsSync(templatePath)) {
     process.exit(1);
 }
 
+const workersName = process.env.WORKERS_NAME || 'tgbot-link-cleaner';
+
 let template = fs.readFileSync(templatePath, 'utf8');
 // Replace the placeholder
 // We use a specific placeholder string
-const config = template.replace(/D1_DATABASE_ID_PLACEHOLDER/g, dbId);
+let config = template.replace(/D1_DATABASE_ID_PLACEHOLDER/g, dbId);
+config = config.replace(/WORKERS_NAME_PLACEHOLDER/g, workersName);
 
 fs.writeFileSync(configPath, config);
 console.log('Successfully generated wrangler.toml from wrangler.toml.template');

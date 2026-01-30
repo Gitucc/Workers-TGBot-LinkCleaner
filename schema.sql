@@ -21,4 +21,5 @@ CREATE TABLE IF NOT EXISTS adguard_rules (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX IF NOT EXISTS idx_adguard_domain ON adguard_rules(domain);
+-- Optimized composite index for filtering by domain and path
+CREATE INDEX IF NOT EXISTS idx_adguard_lookup ON adguard_rules(domain, path_pattern);
