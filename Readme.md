@@ -47,10 +47,14 @@ npx wrangler d1 execute link-cleaner-db --file=./schema.sql
 ### 4. 设置 Secret
 
 ```bash
+# 必须设置：机器人 Token
 npx wrangler secret put TG_BOT_TOKEN
+
+# 推荐设置：管理密钥 (用于触发规则更新，如果不设置则默认使用 TG_BOT_TOKEN)
+npx wrangler secret put ADMIN_KEY
 ```
 
-输入你的 Telegram Bot Token。
+输入你的 Telegram Bot Token 和管理密钥。
 
 ### 5. 部署
 
@@ -62,12 +66,15 @@ npm run deploy
 
 ### 💡 重要：数据初始化
 
-部署成功后，你的数据库是空的。你必须手动触发一次同步（或者等待下一次 Cron 触发），以后 Cron 触发器才会每 3 天接管自动更新。
+部署成功后，你的数据库是空的。
+
+- **GitHub Actions 用户**：无需手动操作，部署脚本会自动触发规则更新。
+- **手动部署用户**：你必须手动执行以下命令（或等待 3 天后的 Cron 触发）：
 
 请执行以下命令（替换为你自己的 Worker 域名）：
 
 ```bash
-curl -X POST https://your-worker.workers.dev/update-rules -H "X-Admin-Key: <YOUR_TG_BOT_TOKEN>"
+curl -X POST https://your-worker.workers.dev/update-rules -H "X-Admin-Key: <YOUR_ADMIN_KEY_OR_TG_BOT_TOKEN>"
 ```
 
 ## 🛠️ 手搓自定义规则 (Tier 1)
@@ -140,8 +147,9 @@ export const rules = [
 1. `CF_API_TOKEN`: 你的 Cloudflare API Token (需具备 Workers 部署权限)。
 2. `CF_ACCOUNT_ID`: 你的 Cloudflare 账户 ID。
 3. `TG_BOT_TOKEN`: 你的 Telegram Bot Token。
-4. `D1_DATABASE_ID`: 你的 D1 数据库 ID (从步骤 2 获取)。
-5. `WORKERS_NAME` (Variables): 可选，自定义 Worker 名称。
+4. `ADMIN_KEY`: 用于触发规则更新的管理密钥（建议与 `TG_BOT_TOKEN` 不同）。
+5. `D1_DATABASE_ID`: 你的 D1 数据库 ID (从步骤 2 获取)。
+6. `WORKERS_NAME` (Variables): 可选，自定义 Worker 名称。
 
 ## 🛠️ 技术栈
 

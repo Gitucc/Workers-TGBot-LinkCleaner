@@ -31,13 +31,13 @@ jobs:
             ADMIN_KEY
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          ADMIN_KEY: ${{ secrets.TG_BOT_TOKEN }}
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY || secrets.TG_BOT_TOKEN }}
 
       - name: Initialize AdGuard Rules
         if: success()
         env:
            DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
-           ADMIN_KEY: ${{ secrets.TG_BOT_TOKEN }}
+           ADMIN_KEY: ${{ secrets.ADMIN_KEY || secrets.TG_BOT_TOKEN }}
         run: |
           if [ -z "$DEPLOY_URL" ]; then
             echo "::warning::Deployment URL is empty. Skipping rule update."
