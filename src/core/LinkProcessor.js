@@ -43,8 +43,9 @@ export class LinkProcessor {
     const rule = this.findRule(url.hostname)
     if (rule) {
       console.log(
-        `[LinkProcessor] Rule Matched: ${rule.hostnames?.[0] ||
-          'RegexRule'} for ${url.hostname}`,
+        `[LinkProcessor] Rule Matched: ${
+          rule.hostnames?.[0] || 'RegexRule'
+        } for ${url.hostname}`,
       )
       // Check if rule is constrained to specific paths.
       // If pathPattern is undefined, it defaults to true (matches all).
@@ -136,7 +137,7 @@ export class LinkProcessor {
       const suffixParts = parts.slice(i)
       const suffixStr = suffixParts.join('.')
       if (!candidates.includes(suffixStr)) candidates.push(suffixStr)
-      
+
       // Add wildcard variants for DB lookup support
       if (suffixParts.length > 1) {
         const wildcard = '*.' + suffixStr
@@ -209,18 +210,18 @@ export class LinkProcessor {
       for (const [param] of newUrl.searchParams) {
         const paramLower = param.toLowerCase()
         const isProtected =
-          toProtect.has(paramLower) || regexProtect.some(r => r.test(param))
+          toProtect.has(paramLower) || regexProtect.some((r) => r.test(param))
         if (isProtected) continue
 
         const shouldRemove =
-          toRemove.has(paramLower) || regexRemove.some(r => r.test(param))
+          toRemove.has(paramLower) || regexRemove.some((r) => r.test(param))
         if (shouldRemove) {
           paramsToDelete.push(param)
         }
       }
 
       if (paramsToDelete.length > 0) {
-        paramsToDelete.forEach(p => newUrl.searchParams.delete(p))
+        paramsToDelete.forEach((p) => newUrl.searchParams.delete(p))
         changed = true
       }
 
@@ -376,7 +377,7 @@ export class LinkProcessor {
       }
     }
     const lowerKeepParams = new Set(
-      (rule.keepParams || []).map(p => p.toLowerCase()),
+      (rule.keepParams || []).map((p) => p.toLowerCase()),
     )
 
     // 2.2 Single pass over all parameters

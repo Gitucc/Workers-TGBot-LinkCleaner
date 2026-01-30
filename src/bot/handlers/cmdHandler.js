@@ -1,19 +1,30 @@
-import { requestTelegramBotAPI } from "../utils/telegram";
+import { requestTelegramBotAPI } from '../utils/telegram'
 
 async function handleTGBotCmd(request, pathname, env) {
-    const token = env.TG_BOT_TOKEN;
-    if (pathname == '/TGBotCmd/setWebhook') {
-        const url = new URL(request.url);
-        const result = await requestTelegramBotAPI("setWebhook", { "url": `${url.origin}/${token}` });
-        return new Response(await result.text(), { headers: { "content-type": "text/plain" } });
-    } else if (pathname == '/TGBotCmd/getWebhookInfo') {
-        const result = await requestTelegramBotAPI("getWebhookInfo");
-        return new Response((await result.text()).replace(token, '<TG_BOT_TOKEN>'), { headers: { "content-type": "text/plain" } });
-    } else if (pathname == '/TGBotCmd/getMe') {
-        const result = await requestTelegramBotAPI("getMe");
-        return new Response(await result.text(), { headers: { "content-type": "text/plain" } });
-    } else
-        return new Response("Unknown command.\n", { headers: { "content-type": "text/plain" } });
+  const token = env.TG_BOT_TOKEN
+  if (pathname == '/TGBotCmd/setWebhook') {
+    const url = new URL(request.url)
+    const result = await requestTelegramBotAPI('setWebhook', {
+      url: `${url.origin}/${token}`,
+    })
+    return new Response(await result.text(), {
+      headers: { 'content-type': 'text/plain' },
+    })
+  } else if (pathname == '/TGBotCmd/getWebhookInfo') {
+    const result = await requestTelegramBotAPI('getWebhookInfo')
+    return new Response(
+      (await result.text()).replace(token, '<TG_BOT_TOKEN>'),
+      { headers: { 'content-type': 'text/plain' } },
+    )
+  } else if (pathname == '/TGBotCmd/getMe') {
+    const result = await requestTelegramBotAPI('getMe')
+    return new Response(await result.text(), {
+      headers: { 'content-type': 'text/plain' },
+    })
+  } else
+    return new Response('Unknown command.\n', {
+      headers: { 'content-type': 'text/plain' },
+    })
 }
 
-export default handleTGBotCmd;
+export default handleTGBotCmd
