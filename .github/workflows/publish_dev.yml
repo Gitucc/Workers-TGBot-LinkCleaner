@@ -13,12 +13,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Generate wrangler.toml
+        run: node scripts/generate-config.js
+        env:
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID_DEV }}
+          WORKERS_NAME: tgbot-link-cleaner-dev
+
       - name: Deploy to Cloudflare Workers
+        id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
+          wranglerVersion: '4.54.0'
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           secrets: |
-              TG_BOT_TOKEN
+            TG_BOT_TOKEN
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN_DEV }}
+
+      - name: Initialize AdGuard Rules
+        if: success()
+        run: |
+          # Using the deployment URL from wrangler-action output to trigger initialization
+          DEPLOYED_URL=$(echo "${{ steps.deploy.outputs.deployment-url }}")
+          echo "Triggering rule update at ${DEPLOYED_URL}/update-rules"
+          curl -X POST "${DEPLOYED_URL}/update-rules" \
+            -H "X-Admin-Key: ${{ secrets.TG_BOT_TOKEN_DEV }}" \
+            -i

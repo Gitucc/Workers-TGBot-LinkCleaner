@@ -3,7 +3,6 @@ name: Deploy
 on:
   push:
     branches:
-      - main
       - master
 
 jobs:
@@ -24,6 +23,7 @@ jobs:
         id: deploy
         uses: cloudflare/wrangler-action@v3
         with:
+          wranglerVersion: '4.54.0'
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           secrets: |

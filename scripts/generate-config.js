@@ -1,9 +1,9 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
+import * as fs from 'fs'
+import * as path from 'path'
+import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const templatePath = path.join(__dirname, '..', 'wrangler.toml.template')
 const configPath = path.join(__dirname, '..', 'wrangler.toml')
@@ -50,8 +50,6 @@ if (!fs.existsSync(templatePath)) {
 const workersName = process.env.WORKERS_NAME || 'tgbot-link-cleaner'
 
 let template = fs.readFileSync(templatePath, 'utf8')
-// Replace the placeholder
-// We use a specific placeholder string
 let config = template.replace(/D1_DATABASE_ID_PLACEHOLDER/g, dbId)
 config = config.replace(/WORKERS_NAME_PLACEHOLDER/g, workersName)
 
