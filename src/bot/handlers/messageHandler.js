@@ -172,17 +172,12 @@ async function handleText({ text, chat, message_id: messageId }, env) {
       }
     })
 
-    if (hasChanges) {
+    const shouldSend = hasChanges || chat.type === 'private'
+    if (shouldSend) {
       let finalMsg = outputLines.join('\n')
       if (chat.type === 'private') {
-        finalMsg +=
-          '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
+        finalMsg += '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
       }
-      await sendMessage(chat.id, finalMsg, null, messageId)
-    } else if (chat.type === 'private') {
-      let finalMsg =
-        outputLines.join('\n') +
-        '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
       await sendMessage(chat.id, finalMsg, null, messageId)
     }
   }
