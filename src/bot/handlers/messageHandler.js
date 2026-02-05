@@ -141,17 +141,18 @@ async function handleText({ text, chat, message_id: messageId }, env) {
         isHostChanged = new URL(cleanedUrl).hostname !== rawUrlObj.hostname
       } catch (e) {}
 
+      let replyText = ''
+      if (chat.type === 'private')
+        replyText = `\`\`\`\n${cleanedUrl}\n\`\`\``
+      else replyText = cleanedUrl
       // If no params to toggle OR host changed (e.g. twitter -> fxtwitter), just show result
       if (rawParams.length === 0 || isHostChanged) {
-        await sendMessage(chat.id, cleanedUrl, null, messageId)
+        await sendMessage(chat.id, replyText, null, messageId, 'Markdown')
       } else {
-        const replyText =
-          cleanedUrl +
-          '\n\n如果你对处理的结果不满意，请在下面选择要保留（或再次移除）的参数吧：'
-
+        replyText += '\n\n如果你对处理的结果不满意，请在下面选择要保留（或再次移除）的参数吧：'
         const keyboardButtons = createKeyboardFromParams(rawParams, 32)
         const replyMarkup = { inline_keyboard: keyboardButtons }
-        await sendMessage(chat.id, replyText, replyMarkup, messageId)
+        await sendMessage(chat.id, replyText, replyMarkup, messageId, 'Markdown')
       }
     }
   } else {
@@ -176,9 +177,10 @@ async function handleText({ text, chat, message_id: messageId }, env) {
     if (shouldSend) {
       let finalMsg = outputLines.join('\n')
       if (chat.type === 'private') {
+        finalMsg = `\`\`\`\n${finalMsg}\n\`\`\``
         finalMsg += '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
       }
-      await sendMessage(chat.id, finalMsg, null, messageId)
+      await sendMessage(chat.id, finalMsg, null, messageId, 'Markdown')
     }
   }
 }
