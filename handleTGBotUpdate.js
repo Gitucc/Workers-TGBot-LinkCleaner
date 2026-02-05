@@ -1,4 +1,3 @@
-export default handleTGBotUpdate
 import { handleMessage } from "./src/bot/handlers/messageHandler";
 import { handleCallbackQuery } from "./src/bot/handlers/callbackQueryHandler";
 import { handleInlineQuery } from "./src/bot/handlers/inlineQueryHandler";
