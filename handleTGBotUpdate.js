@@ -1,3 +1,4 @@
+export default handleTGBotUpdate
 import { handleMessage } from "./src/bot/handlers/messageHandler";
 import { handleCallbackQuery } from "./src/bot/handlers/callbackQueryHandler";
 import { handleInlineQuery } from "./src/bot/handlers/inlineQueryHandler";
@@ -12,7 +13,7 @@ async function handleTGBotUpdate(request, env) {
         else if (update.inline_query)
             await handleInlineQuery(update.inline_query, env);
     } catch (err) {
-        console.error(err.stack);
+        console.error('Update Handler Error:', err.stack);
     }
     return new Response(JSON.stringify({}), { headers: { "content-type": "application/json;charset=UTF-8" } });
 }
