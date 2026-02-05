@@ -165,22 +165,19 @@ async function handleText({ text, chat, message_id: messageId }, env) {
         outputLines.push(url)
         hasChanges = true
       } else {
-        let hostname = '该域名'
-        try {
-          hostname = new URL(rawLink).hostname
-        } catch (e) {}
-        outputLines.push(`[${hostname}] ${CLEAN_NOT_NEEDED}`)
+        outputLines.push(rawLink)
       }
     })
 
-    const shouldSend = hasChanges || chat.type === 'private'
-    if (shouldSend) {
-      let finalMsg = outputLines.join('\n')
+    if (hasChanges) {
+      let replyText = outputLines.join('\n')
       if (chat.type === 'private') {
-        finalMsg = `\`\`\`\n${finalMsg}\n\`\`\``
-        finalMsg += '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
+        replyText = `\`\`\`\n${replyText}\n\`\`\``
+        replyText += '\n\n🪢如果你对其中一些链接的处理结果不满意的话，还请你尝试将这些链接分开发送，每次只发送一条链接，以便更好地处理问题哦~\n'
       }
-      await sendMessage(chat.id, finalMsg, null, messageId, 'Markdown')
+      await sendMessage(chat.id, replyText, null, messageId, 'Markdown')
+    } else if (chat.type === 'private') {
+      await sendMessage(chat.id, CLEAN_NOT_NEEDED, null, messageId)
     }
   }
 }
